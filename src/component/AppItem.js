@@ -12,6 +12,13 @@ class activeItem extends Component {
         this.props.mutation1({
             variables: {thisID: this.props.id, thisCompleted: e.target.checked},
             refetchQueries: [{query: myQuery}]
+        }).then(({ data }) => {
+            if(data.changeCompleted.isCompleted === false){
+                alert("不能处理当前任务");
+            }
+            //console.log('got data', data);
+        }).catch((error) => {
+            console.log('there was an error sending the query', error);
         });
     }
 
@@ -80,7 +87,6 @@ class finishedItem extends Component {
         let ft = new Date(this.props.finishDate);
         let time = ft.getTime() - ct.getTime();
         let tem = MillisecondToDate(time);
-
         return (
             <li onMouseOver={this.handleMouseOver.bind(this)} onMouseOut={this.handleMouseOut.bind(this)} ref="item">
                 <div className="input-group">
@@ -110,7 +116,15 @@ function MillisecondToDate(msd) {
                     parseInt(time / 3600.0, 10)) * 60, 10) + "分钟" +
                 parseInt((parseFloat((parseFloat(time / 3600.0) - parseInt(time / 3600.0, 10)) * 60) -
                     parseInt((parseFloat(time / 3600.0) - parseInt(time / 3600.0, 10)) * 60, 10)) * 60, 10) + "秒";
-        } else {
+        } else if (time >= 60 * 60 * 24) {
+            let day = parseInt(time / 86400.0, 10);
+            let afterDay = time%86400;
+            let hour = parseInt(afterDay / 3600.0, 10);
+            let afterHour = afterDay%3600;
+            let min = parseInt(afterHour / 60.0, 10);
+            let second = afterHour%min;
+            time = day + "天" + hour + "小时" + min + "分钟" + second + "秒";
+        }else {
             time = parseInt(time, 10) + "秒";
         }
     } else {
